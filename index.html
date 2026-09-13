@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shelf & Spice</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --ground:#F6EDEA; --surface:#FFFFFF; --surface-2:#FBF3F1;
+    --ink:#2B161F; --ink-soft:#7C616B; --line:#E9D8D8;
+    --accent:#9C1F3F; --accent-strong:#7A1731; --accent-soft:#F3D6DC;
+    --gold:#9C7327; --gold-soft:#F1E2C6;
+    --danger:#A8462B; --danger-soft:#F3DCD2;
+    --shadow:rgba(43,22,31,.10);
+    --font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+    --font-body:'Karla',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#1B1013; --surface:#241318; --surface-2:#2B161C;
+      --ink:#F5E8EC; --ink-soft:#C7A6AF; --line:#3B222A;
+      --accent:#F0A7B8; --accent-strong:#F6C2CE; --accent-soft:#3E1E27;
+      --gold:#E4BC7C; --gold-soft:#3A2E17;
+      --danger:#E2836A; --danger-soft:#3C241C;
+      --shadow:rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#1B1013; --surface:#241318; --surface-2:#2B161C;
+    --ink:#F5E8EC; --ink-soft:#C7A6AF; --line:#3B222A;
+    --accent:#F0A7B8; --accent-strong:#F6C2CE; --accent-soft:#3E1E27;
+    --gold:#E4BC7C; --gold-soft:#3A2E17;
+    --danger:#E2836A; --danger-soft:#3C241C;
+    --shadow:rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--ground);color:var(--ink);font-family:var(--font-body);margin:0;-webkit-tap-highlight-color:transparent;}
+  button,input,select,textarea{font-family:inherit;color:inherit;}
+  ::selection{background:var(--accent-soft);}
+  .app-shell{
+    max-width:480px;margin:0 auto;min-height:100dvh;background:var(--surface);
+    display:flex;flex-direction:column;position:relative;
+    box-shadow:0 0 60px var(--shadow);
+  }
+  a{color:var(--accent-strong);}
+
+  /* Topbar */
+  .topbar{
+    position:sticky;top:0;z-index:5;background:var(--surface);
+    border-bottom:1px solid var(--line);padding:18px 20px 14px;
+  }
+  .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-strong);margin:0 0 2px;}
+  .topbar-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;}
+  .topbar h1{font-family:var(--font-display);font-weight:600;font-size:26px;margin:0;text-wrap:balance;}
+  .topbar-stat{font-family:var(--font-mono);font-size:13px;color:var(--ink-soft);white-space:nowrap;}
+
+  main{flex:1;overflow-y:auto;padding:16px 20px 24px;}
+
+  /* Sample banner */
+  .banner-sample{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:12px;
+    padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--ink-soft);
+  }
+  .banner-sample b{color:var(--ink);}
+  .banner-sample .btn{padding:6px 12px;font-size:12.5px;}
+
+  /* Stat row */
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+  .stat-tile{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 10px;text-align:center;}
+  .stat-value{display:block;font-family:var(--font-mono);font-weight:600;font-size:18px;color:var(--accent-strong);font-variant-numeric:tabular-nums;}
+  .stat-label{display:block;font-size:11px;color:var(--ink-soft);margin-top:3px;letter-spacing:.02em;}
+
+  .section-title{font-family:var(--font-display);font-weight:600;font-size:16px;margin:20px 0 10px;}
+  .section-title:first-child{margin-top:0;}
+  .section-hint{font-size:12.5px;color:var(--ink-soft);margin:-6px 0 12px;}
+
+  /* Search + filters */
+  .searchbar{
+    display:flex;align-items:center;gap:8px;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:11px;padding:9px 12px;margin-bottom:12px;
+  }
+  .searchbar svg{width:16px;height:16px;color:var(--ink-soft);flex-shrink:0;}
+  .searchbar input{border:none;background:none;outline:none;font-size:14.5px;width:100%;color:var(--ink);}
+  .searchbar input::placeholder{color:var(--ink-soft);}
+
+  .filter-row{display:flex;gap:14px;align-items:center;margin-bottom:12px;}
+  .chiprow{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;flex:1;scrollbar-width:none;}
+  .chiprow::-webkit-scrollbar{display:none;}
+  .chip{
+    flex-shrink:0;font-size:13px;padding:6px 13px;border-radius:999px;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink-soft);cursor:pointer;white-space:nowrap;font-weight:500;
+    transition:background .12s,color .12s,border-color .12s;
+  }
+  .chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .sortselect{
+    flex-shrink:0;font-size:12.5px;border:1px solid var(--line);background:var(--surface);
+    color:var(--ink-soft);border-radius:9px;padding:6px 8px;
+  }
+
+  /* Book cards */
+  .book-list{display:flex;flex-direction:column;gap:10px;}
+  .book-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 14px;
+    cursor:pointer;transition:border-color .12s,transform .12s;
+  }
+  .book-card:active{transform:scale(.99);}
+  .book-card.is-next{border-color:var(--accent);background:linear-gradient(var(--surface),var(--surface)) padding-box, var(--surface);}
+  .badge-next{
+    display:inline-block;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+    background:var(--accent);color:#fff;border-radius:6px;padding:2px 7px;margin-bottom:7px;
+  }
+  .book-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .book-title{font-family:var(--font-display);font-weight:600;font-size:16.5px;margin:0;text-wrap:balance;}
+  .book-sub{font-size:12.5px;color:var(--ink-soft);margin:2px 0 0;}
+  .pill{
+    flex-shrink:0;font-family:var(--font-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;
+    padding:3px 8px;border-radius:6px;font-weight:600;white-space:nowrap;
+  }
+  .pill-tbr{background:var(--gold-soft);color:var(--gold);}
+  .pill-reading{background:var(--accent-soft);color:var(--accent-strong);}
+  .pill-read{background:var(--surface-2);color:var(--ink-soft);border:1px solid var(--line);}
+  .pill-dnf{background:var(--danger-soft);color:var(--danger);}
+
+  .book-meta-row{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap;}
+  .icon-rating{display:flex;gap:1px;}
+  .icon-rating svg{width:13px;height:13px;color:var(--line);}
+  .icon-rating svg.filled{color:var(--gold);}
+  .icon-spice{display:flex;gap:1px;}
+  .icon-spice svg{width:13px;height:13px;color:var(--line);}
+  .icon-spice svg.filled{color:var(--accent);}
+  .meta-source{font-size:11px;color:var(--ink-soft);font-family:var(--font-mono);}
+
+  .trope-chip-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;}
+  .trope-chip{
+    font-size:11.5px;padding:3px 9px;border-radius:999px;background:var(--accent-soft);
+    color:var(--accent-strong);font-weight:600;
+  }
+  .trope-chip.is-gold{background:var(--gold-soft);color:var(--gold);}
+
+  .empty-state{text-align:center;padding:50px 20px;color:var(--ink-soft);}
+  .empty-state svg{width:34px;height:34px;color:var(--line);margin-bottom:10px;}
+  .empty-state p{font-size:13.5px;margin:0;}
+
+  /* Trope rank list (Recommend) */
+  .trope-rank-list{display:flex;flex-direction:column;gap:8px;}
+  .trope-rank-item{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;
+    cursor:pointer;
+  }
+  .trope-rank-item.active{border-color:var(--accent);}
+  .trope-rank-name{font-weight:600;font-size:14px;}
+  .trope-rank-meta{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11.5px;color:var(--ink-soft);flex-shrink:0;}
+
+  .match-group{margin-bottom:6px;}
+
+  .external-card{
+    background:var(--surface-2);border:1px dashed var(--line);border-radius:14px;padding:13px 14px;
+  }
+  .external-blurb{font-size:13px;color:var(--ink-soft);margin:6px 0 0;}
+  .btn-add-small{
+    flex-shrink:0;background:var(--surface);border:1px solid var(--accent);color:var(--accent-strong);
+    font-size:11.5px;font-weight:700;border-radius:8px;padding:6px 10px;cursor:pointer;white-space:nowrap;
+  }
+  .external-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px;}
+  .kindle-link{font-size:11.5px;font-weight:600;color:var(--ink-soft);text-decoration:none;border-bottom:1px dotted var(--ink-soft);white-space:nowrap;}
+  .kindle-link:hover{color:var(--accent-strong);border-color:var(--accent-strong);}
+
+  /* Bottom tab bar */
+  .tabbar{
+    position:sticky;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-around;
+    padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+  .tabbtn{
+    background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;
+    color:var(--ink-soft);font-size:10.5px;font-weight:600;padding:4px 14px;cursor:pointer;
+    letter-spacing:.01em;
+  }
+  .tabbtn svg{width:21px;height:21px;}
+  .tabbtn.active{color:var(--accent-strong);}
+  .tabbtn-add{
+    background:var(--accent);color:#fff;width:46px;height:46px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;margin-top:-22px;
+    box-shadow:0 4px 14px var(--shadow);flex-shrink:0;
+  }
+  .tabbtn-add svg{width:22px;height:22px;}
+  .tabbtn-add span{display:none;}
+
+  /* Sheet / modal */
+  .sheet-overlay{
+    position:fixed;inset:0;background:rgba(20,10,14,.44);display:flex;align-items:flex-end;
+    justify-content:center;z-index:20;opacity:0;pointer-events:none;transition:opacity .18s;
+  }
+  .sheet-overlay.open{opacity:1;pointer-events:auto;}
+  .sheet{
+    width:100%;max-width:480px;max-height:92dvh;overflow-y:auto;background:var(--surface);
+    border-radius:22px 22px 0 0;padding:18px 20px calc(20px + env(safe-area-inset-bottom));
+    transform:translateY(16px);transition:transform .18s;
+  }
+  .sheet-overlay.open .sheet{transform:translateY(0);}
+  @media (prefers-reduced-motion: reduce){ .sheet, .sheet-overlay{transition:none;} }
+  .sheet-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .sheet-header h2{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0;}
+  .sheet-close{background:var(--surface-2);border:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);}
+  .sheet-close svg{width:15px;height:15px;}
+  .sheet-note{font-size:12px;color:var(--ink-soft);font-style:italic;margin:2px 0 12px;}
+
+  .form-row{margin-bottom:16px;}
+  .suggestions{margin-top:6px;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .suggestion-item{display:block;width:100%;text-align:left;background:var(--surface-2);border:none;border-bottom:1px solid var(--line);padding:9px 12px;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink);}
+  .suggestion-item:last-child{border-bottom:none;}
+  .suggestion-item span{display:block;font-size:11.5px;font-weight:500;color:var(--ink-soft);margin-top:1px;}
+  .label{display:block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:7px;}
+  .input,.textarea{
+    width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;
+    padding:10px 12px;font-size:15px;outline:none;color:var(--ink);
+  }
+  .input:focus,.textarea:focus{border-color:var(--accent);}
+  .textarea{resize:vertical;min-height:64px;font-family:var(--font-body);}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  .segmented{display:flex;gap:6px;flex-wrap:wrap;}
+  .segmented-btn{
+    border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);
+    padding:8px 12px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;
+  }
+  .segmented-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+  .picker-row{display:flex;gap:8px;}
+  .picker-btn{background:none;border:none;padding:2px;cursor:pointer;}
+  .picker-btn svg{width:26px;height:26px;color:var(--line);}
+  .picker-btn svg.filled{color:var(--gold);}
+  .picker-btn.spice svg.filled{color:var(--accent);}
+
+  .trope-picker{display:flex;flex-wrap:wrap;gap:7px;}
+  .trope-picker .chip{border-radius:999px;}
+  .add-trope-row{display:flex;gap:8px;margin-top:10px;}
+  .add-trope-row input{flex:1;}
+  .add-trope-row button{
+    background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:0 14px;
+    font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;
+  }
+
+  .sheet-footer{display:flex;gap:10px;margin-top:6px;}
+  .btn{
+    border:none;border-radius:11px;padding:13px 18px;font-size:14.5px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .btn-primary{background:var(--accent);color:#fff;flex:1;}
+  .btn-danger{background:var(--danger-soft);color:var(--danger);}
+  .btn-ghost{background:var(--surface-2);color:var(--ink-soft);}
+  .btn:focus-visible,.chip:focus-visible,.tabbtn:focus-visible,.segmented-btn:focus-visible,.picker-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+</style>
+
+</head>
+<body>
+<div class="app-shell" id="app-shell">
+  <header class="topbar" id="topbar"></header>
+  <main id="content"></main>
+  <nav class="tabbar" id="tabbar">
+    <button class="tabbtn" data-action="switch-tab" data-tab="shelf">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="9" width="4" height="11" rx="1"/><rect x="10" y="4" width="4" height="16" rx="1"/><rect x="16.5" y="7" width="4" height="13" rx="1"/></svg>
+      <span>Shelf</span>
+    </button>
+    <button class="tabbtn tabbtn-add" data-action="open-add" aria-label="Add a book">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Add</span>
+    </button>
+    <button class="tabbtn" data-action="switch-tab" data-tab="recommend">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5c.6 3.4 1.8 5.7 3.6 7.5 1.8 1.8 4.1 3 7.5 3.6-3.4.6-5.7 1.8-7.5 3.6-1.8 1.8-3 4.1-3.6 7.5-.6-3.4-1.8-5.7-3.6-7.5C6.6 15.4 4.3 14.2.9 13.6c3.4-.6 5.7-1.8 7.5-3.6 1.8-1.8 3-4.1 3.6-7.5z"/></svg>
+      <span>Recommend</span>
+    </button>
+  </nav>
+</div>
+
+<div class="sheet-overlay" id="sheet-overlay">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var PRESET_TROPES = [
+    "Enemies to Lovers","Friends to Lovers","Second Chance","Fake Dating","Marriage of Convenience",
+    "Forced Proximity","Grumpy x Sunshine","Slow Burn","Insta-Love","Love Triangle","Age Gap",
+    "Forbidden Romance","Secret Billionaire","Single Dad","Small Town","Workplace Romance",
+    "Sports Romance","Royalty / Arranged Marriage","Mafia Romance","Dark Romance","Monster Romance",
+    "Paranormal / Shifter","Reverse Harem","Why Choose","Time Travel","Reunion Romance",
+    "Best Friend's Sibling","Secret Baby","One Bed","Touch Her and Die"
+  ];
+  var SOURCES = ["Kindle Unlimited","Kindle Purchase","Physical Copy","Audiobook","Other"];
+  var STATUS_LABELS = { tbr:"Want to Read", reading:"Reading", read:"Finished", dnf:"DNF" };
+
+  var SAMPLE_BOOKS = [
+    { id:"sample-1", sample:true, title:"Fourth Wing", author:"Rebecca Yarros", series:"The Empyrean", status:"read", rating:5, spice:3, tropes:["Enemies to Lovers","Forced Proximity","Slow Burn"], source:"Kindle Unlimited", dateFinished:"2025-11-02", notes:"", createdAt:"2025-11-02" },
+    { id:"sample-2", sample:true, title:"The Hating Game", author:"Sally Thorne", series:"", status:"read", rating:4, spice:2, tropes:["Enemies to Lovers","Workplace Romance"], source:"Kindle Purchase", dateFinished:"2025-08-14", notes:"", createdAt:"2025-08-14" },
+    { id:"sample-3", sample:true, title:"Icebreaker", author:"Hannah Grace", series:"", status:"read", rating:4, spice:3, tropes:["Sports Romance","Grumpy x Sunshine","Slow Burn"], source:"Kindle Unlimited", dateFinished:"2025-06-30", notes:"", createdAt:"2025-06-30" },
+    { id:"sample-4", sample:true, title:"Beach Read", author:"Emily Henry", series:"", status:"tbr", rating:0, spice:0, tropes:["Grumpy x Sunshine","Small Town"], source:"Kindle Unlimited", dateFinished:"", notes:"", createdAt:"2025-09-01" }
+  ];
+
+  // Curated picks from well-known romance releases, tagged by trope from general
+  // reader consensus (not live web data — spice/tropes are approximate).
+  var EXTERNAL_BOOKS = [
+    { title:"Iron Flame", author:"Rebecca Yarros", tropes:["Enemies to Lovers","Slow Burn","Forced Proximity"], spice:3, blurb:"The war-college dragon riders saga continues." },
+    { title:"People We Meet on Vacation", author:"Emily Henry", tropes:["Friends to Lovers","Slow Burn"], spice:1, blurb:"Best friends, one trip a year, years of almost." },
+    { title:"Book Lovers", author:"Emily Henry", tropes:["Enemies to Lovers","Small Town"], spice:2, blurb:"A cutthroat literary agent, out of place in a small town." },
+    { title:"The Deal", author:"Elle Kennedy", tropes:["Fake Dating","Sports Romance"], spice:3, blurb:"A hockey star and a music major fake-date their way in." },
+    { title:"The Charm Offensive", author:"Alison Cochrun", tropes:["Grumpy x Sunshine","Forbidden Romance"], spice:2, blurb:"A reality dating show producer falls for the bachelor." },
+    { title:"Get a Life, Chloe Brown", author:"Talia Hibbert", tropes:["Grumpy x Sunshine"], spice:3, blurb:"A chronically-ill woman hires a bad-boy super to teach her to live." },
+    { title:"The Kiss Quotient", author:"Helen Hoang", tropes:["Fake Dating","Workplace Romance"], spice:4, blurb:"An econometrician hires an escort to teach her dating and falls hard." },
+    { title:"The Bride Test", author:"Helen Hoang", tropes:["Marriage of Convenience","Royalty / Arranged Marriage"], spice:3, blurb:"A Vietnamese woman is brought to the US for an arranged match." },
+    { title:"Twisted Love", author:"Ana Huang", tropes:["Best Friend's Sibling","Dark Romance"], spice:4, blurb:"A guarded shipping heir falls for his best friend's sister." },
+    { title:"Twisted Hate", author:"Ana Huang", tropes:["Enemies to Lovers"], spice:4, blurb:"Rival professor and student-turned-colleague, years of animosity." },
+    { title:"King of Wrath", author:"Ana Huang", tropes:["Marriage of Convenience","Dark Romance"], spice:4, blurb:"A ruthless CEO marries for revenge, not love — at first." },
+    { title:"Haunting Adeline", author:"H.D. Carlton", tropes:["Dark Romance","Forced Proximity"], spice:5, blurb:"A dark, possessive stalker romance — heavy content, reader discretion." },
+    { title:"Reminders of Him", author:"Colleen Hoover", tropes:["Second Chance","Small Town"], spice:2, blurb:"A mother rebuilds her life and love in the town that blames her." },
+    { title:"A Court of Thorns and Roses", author:"Sarah J. Maas", tropes:["Forbidden Romance","Paranormal / Shifter","Slow Burn"], spice:3, blurb:"A huntress is dragged into a faerie bargain and a war of courts." },
+    { title:"A Court of Mist and Fury", author:"Sarah J. Maas", tropes:["Second Chance","Paranormal / Shifter"], spice:4, blurb:"The series pivots to a slow-burn, healing second-chance romance." },
+    { title:"From Blood and Ash", author:"Jennifer L. Armentrout", tropes:["Forbidden Romance","Paranormal / Shifter","Slow Burn"], spice:4, blurb:"A sheltered Chosen One and her forbidden, hooded guard." },
+    { title:"The Bridge Kingdom", author:"Danielle L. Jensen", tropes:["Enemies to Lovers","Royalty / Arranged Marriage"], spice:3, blurb:"A princess-turned-spy is married off to the enemy king." },
+    { title:"Ice Planet Barbarians", author:"Ruby Dixon", tropes:["Monster Romance","Insta-Love"], spice:4, blurb:"Stranded human women, blue alien warriors, fated mates." },
+    { title:"The Ritual", author:"Shantel Tessier", tropes:["Dark Romance","Forbidden Romance"], spice:5, blurb:"A secret society, dark bargains, and an obsessive pull." },
+    { title:"Him", author:"Sarina Bowen & Elle Kennedy", tropes:["Friends to Lovers","Sports Romance"], spice:3, blurb:"Two closeted college hockey players, once best friends." },
+    { title:"Well Met", author:"Jen DeLuca", tropes:["Grumpy x Sunshine","Small Town"], spice:2, blurb:"A reluctant Renaissance Faire volunteer clashes with its gruff director." },
+    { title:"The Unhoneymooners", author:"Christina Lauren", tropes:["Enemies to Lovers","Forced Proximity","One Bed"], spice:2, blurb:"Warring siblings-in-law stuck sharing a free honeymoon." },
+    { title:"The Soulmate Equation", author:"Christina Lauren", tropes:["Grumpy x Sunshine","Slow Burn"], spice:2, blurb:"A single mom data scientist meets her algorithmic match." },
+    { title:"The Spanish Love Deception", author:"Elena Armas", tropes:["Fake Dating","Forced Proximity","Slow Burn","One Bed"], spice:3, blurb:"A fake wedding date to Spain with the coworker she can't stand." },
+    { title:"The American Roommate Experiment", author:"Elena Armas", tropes:["Forced Proximity","Slow Burn"], spice:3, blurb:"Platonic roommates, one impulsive fake-relationship experiment." },
+    { title:"Things We Never Got Over", author:"Lucy Score", tropes:["Small Town","Secret Baby"], spice:3, blurb:"A runaway bride's twin sister and the small-town lawyer stuck with her mess." },
+    { title:"Fifty Shades of Grey", author:"E.L. James", tropes:["Dark Romance","Secret Billionaire"], spice:5, blurb:"The genre-defining billionaire BDSM romance." },
+    { title:"The Wall of Winnipeg and Me", author:"Mariana Zapata", tropes:["Slow Burn","Forced Proximity","Sports Romance"], spice:3, blurb:"A fired assistant and the intimidating athlete she still lives with." },
+    { title:"Practice Makes Perfect", author:"Sarah Adams", tropes:["Enemies to Lovers","Small Town"], spice:2, blurb:"Small-town rivals forced into a very public fake engagement." },
+    { title:"When in Rome", author:"Sarah Adams", tropes:["Small Town","Grumpy x Sunshine","Fake Dating"], spice:2, blurb:"A pop star hides out in a small town and needs a fake boyfriend." },
+    { title:"The Cheat Sheet", author:"Sarah Adams", tropes:["Friends to Lovers","Fake Dating","Sports Romance"], spice:2, blurb:"Best friends fake-date to hide that the feelings are already real." },
+    { title:"Divine Rivals", author:"Rebecca Ross", tropes:["Enemies to Lovers","Slow Burn"], spice:1, blurb:"Rival letter-writing journalists, a war, and enchanted typewriters." },
+    { title:"Assistant to the Villain", author:"Hannah Nicole Maehrer", tropes:["Workplace Romance","Grumpy x Sunshine"], spice:1, blurb:"A cheerful assistant thrives working for a feared villain." },
+    { title:"Credence", author:"Penelope Douglas", tropes:["Forbidden Romance","Dark Romance"], spice:4, blurb:"Step-siblings-to-be, trapped together, feelings neither wants." },
+    { title:"Punk 57", author:"Penelope Douglas", tropes:["Enemies to Lovers"], spice:4, blurb:"Anonymous pen pals turned real-life high-school rivals." },
+    { title:"The Play", author:"Elle Kennedy", tropes:["Fake Dating","Sports Romance"], spice:3, blurb:"A hockey captain fake-dates his best friend's little sister." },
+    { title:"The Chase", author:"Elle Kennedy", tropes:["Enemies to Lovers","Sports Romance"], spice:3, blurb:"A driven athlete and the girl who's never once been impressed by him." },
+    { title:"The Fine Print", author:"Lauren Asher", tropes:["Grumpy x Sunshine","Secret Billionaire","Forced Proximity"], spice:3, blurb:"A theme-park heiress and the reclusive CEO she must work beside." },
+    { title:"Terms and Conditions", author:"Lauren Asher", tropes:["Marriage of Convenience","Secret Billionaire"], spice:3, blurb:"A marriage of convenience between hotel-empire siblings-in-law." },
+    { title:"Final Offer", author:"Lauren Asher", tropes:["Enemies to Lovers","Secret Billionaire"], spice:3, blurb:"A hotel empire heir clashes with the woman auditing his company." },
+    { title:"Weather Girl", author:"Rachel Lynn Solomon", tropes:["Fake Dating","Workplace Romance"], spice:2, blurb:"A TV meteorologist and sports reporter fake-date to fix their bosses' marriage." },
+    { title:"Corrupt", author:"Penelope Douglas", tropes:["Dark Romance","Reunion Romance"], spice:4, blurb:"A mob boss's daughter and the man who's been watching her for years." },
+    { title:"My Fault", author:"Mercedes Ron", tropes:["Enemies to Lovers","Forbidden Romance","Age Gap"], spice:3, blurb:"Newly blended step-siblings clash, then can't stay away from each other." },
+    { title:"Does It Hurt?", author:"H.D. Carlton", tropes:["Dark Romance","Forbidden Romance"], spice:5, blurb:"A dark campus romance with a possessive, secretive love interest." },
+    { title:"Heated Rivalry", author:"Rachel Reid", tropes:["Enemies to Lovers","Sports Romance"], spice:3, blurb:"Two rival NHL players, a decade of secret hookups on the road." },
+    { title:"Brutal Prince", author:"Sophie Lark", tropes:["Mafia Romance","Dark Romance","Forbidden Romance"], spice:4, blurb:"Childhood friends on opposite sides of a mafia war." },
+    { title:"Jasad Heir", author:"Sara Hashem", tropes:["Enemies to Lovers","Royalty / Arranged Marriage"], spice:2, blurb:"An exiled heir disguises herself to infiltrate the kingdom that destroyed hers." },
+    { title:"Alchemised", author:"SenLinYu", tropes:["Slow Burn","Dark Romance","Forbidden Romance"], spice:3, blurb:"A prisoner of war and her captor slowly, uneasily change each other. Heavy themes." },
+    { title:"The Sweetest Oblivion", author:"Danielle Lori", tropes:["Mafia Romance","Slow Burn","Forbidden Romance"], spice:3, blurb:"A mafia heir's fake relationship spirals into something neither planned." },
+    { title:"Bad Bishop", author:"L.J. Shen", tropes:["Mafia Romance","Enemies to Lovers"], spice:4, blurb:"A ruthless bishop of the underworld meets his match." },
+    { title:"Fierce King", author:"Sadie Kincaid", tropes:["Mafia Romance","Dark Romance"], spice:4, blurb:"An arranged mafia match neither the king nor his bride wanted." },
+    { title:"365 Days", author:"Blanka Lipinska", tropes:["Dark Romance","Mafia Romance","Insta-Love"], spice:5, blurb:"A mafia don gives a captive woman a year to fall for him. Notorious for dubious-consent themes — heavy reader discretion advised." },
+    { title:"Pucking Around", author:"Emily Rath", tropes:["Reverse Harem","Sports Romance","Why Choose"], spice:4, blurb:"A hockey manager ends up tangled with an entire line of players." },
+    { title:"Carnage", author:"Shantel Tessier", tropes:["Dark Romance","Reverse Harem"], spice:5, blurb:"A dark secret-society romance with multiple obsessive love interests." },
+    { title:"The Cinnamon Bun Book Store", author:"Laurie Gilmore", tropes:["Small Town","Grumpy x Sunshine"], spice:1, blurb:"A cozy small-town bookshop owner and her grumpy new neighbor." },
+    { title:"Juniper Hill", author:"Devney Perry", tropes:["Small Town","Second Chance"], spice:2, blurb:"A woman returns to her hometown and the man she once left behind." },
+    { title:"Timeless", author:"Devney Perry", tropes:["Secret Billionaire","Slow Burn"], spice:2, blurb:"A guarded heiress and the bodyguard she was never supposed to fall for." },
+    { title:"Twisted Lies", author:"Ana Huang", tropes:["Forbidden Romance","Slow Burn"], spice:3, blurb:"A closed-off heiress and the guarded neurosurgeon assigned to protect her." },
+    { title:"King of Pride", author:"Ana Huang", tropes:["Enemies to Lovers","Secret Billionaire"], spice:4, blurb:"A ruthless CEO and the assistant who refuses to be intimidated by him." },
+    { title:"Good Boy", author:"Sarina Bowen & Elle Kennedy", tropes:["Fake Dating","Sports Romance"], spice:3, blurb:"A hockey player's fake relationship to impress his family goes sideways." },
+    { title:"Brooklynaire", author:"Sarina Bowen", tropes:["Second Chance","Sports Romance","Single Dad"], spice:3, blurb:"A single-dad hockey team owner and the woman who got away." },
+    { title:"Daydream", author:"Hannah Grace", tropes:["Friends to Lovers","Sports Romance"], spice:3, blurb:"A college hockey player and the best friend he's afraid to lose." },
+    { title:"Birthday Girl", author:"Penelope Douglas", tropes:["Age Gap","Forbidden Romance"], spice:4, blurb:"A young woman inherits a bar and clashes with its much-older manager." },
+    { title:"If We Ever Meet Again", author:"Ana Huang", tropes:["Friends to Lovers","Second Chance"], spice:3, blurb:"Former best friends reunite years after a falling-out neither explained." },
+    { title:"Problematic Summer Romance", author:"Ali Hazelwood", tropes:["Age Gap","Forbidden Romance"], spice:3, blurb:"A publicist falls for her famous client's older, off-limits brother." },
+    { title:"Lovelight Farms", author:"B.K. Borison", tropes:["Fake Dating","Small Town"], spice:2, blurb:"A struggling Christmas tree farm owner fake-dates her way to good press." },
+    { title:"In the Weeds", author:"B.K. Borison", tropes:["Small Town","Grumpy x Sunshine"], spice:2, blurb:"A sunny farm-stand baker and the notoriously grumpy chef next door." },
+    { title:"If He Had Been With Me", author:"Laura Nowlin", tropes:["Love Triangle"], spice:1, blurb:"Childhood best friends who were always meant to be, until they weren't." },
+    { title:"To Tame a Highland Warrior", author:"Karen Marie Moning", tropes:["Time Travel","Forbidden Romance"], spice:3, blurb:"A modern woman and a medieval Highland warrior across centuries." },
+    { title:"Beyond the Highland Mist", author:"Karen Marie Moning", tropes:["Time Travel"], spice:3, blurb:"A time-slip romance between a modern woman and a 16th-century laird." },
+    { title:"The Last Viking", author:"Sandra Hill", tropes:["Time Travel"], spice:3, blurb:"A Norse warrior wakes up in the modern day." },
+    { title:"Outlander", author:"Diana Gabaldon", tropes:["Time Travel","Slow Burn"], spice:3, blurb:"A WWII nurse is swept back to 18th-century Scotland." },
+    { title:"Hungry for You", author:"Lynsay Sands", tropes:["Paranormal / Shifter","Dark Romance"], spice:3, blurb:"Part of the long-running Argeneau vampire romance series." },
+    { title:"All He'll Ever Be", author:"Willow Winters", tropes:["Dark Romance","Forced Proximity"], spice:4, blurb:"A dark, possessive romance from a prolific indie dark-romance author." },
+    { title:"Black Ties and White Lies", author:"Kat Singleton", tropes:["Workplace Romance","Secret Billionaire"], spice:3, blurb:"A wedding planner falls for the best man she can't stand." },
+    { title:"Bridget Jones's Diary", author:"Helen Fielding", tropes:["Workplace Romance","Love Triangle"], spice:1, blurb:"The genre-defining romantic comedy diary novel." },
+    { title:"Million Kisses in Your Lifetime", author:"Monica Murphy", tropes:["Friends to Lovers","Slow Burn"], spice:3, blurb:"A slow-burn new-adult romance between longtime friends." },
+    { title:"A Thousand Boy Kisses", author:"Tillie Cole", tropes:["Friends to Lovers","Reunion Romance"], spice:2, blurb:"Childhood neighbors and sweethearts, an emotional lifelong love story." },
+    { title:"Burn", author:"Suzanne Wright", tropes:["Paranormal / Shifter","Insta-Love"], spice:4, blurb:"A shifter fated-mates romance from a popular paranormal romance author." },
+    { title:"Her Soul to Take", author:"Harley Laroux", tropes:["Dark Romance","Monster Romance"], spice:5, blurb:"A dark demon romance with heavy, explicit content — reader discretion advised." },
+    { title:"Fantasy Lover", author:"Sherrilyn Kenyon", tropes:["Paranormal / Shifter","Forced Proximity"], spice:3, blurb:"A woman accidentally summons a cursed warrior bound to serve her." },
+    { title:"Dark Lover", author:"J.R. Ward", tropes:["Paranormal / Shifter","Dark Romance"], spice:4, blurb:"Book one of the iconic Black Dagger Brotherhood vampire series." },
+    { title:"Lover Awakened", author:"J.R. Ward", tropes:["Paranormal / Shifter","Dark Romance"], spice:4, blurb:"A scarred vampire warrior and the woman who breaks through his walls." },
+    { title:"Dark Prince", author:"Christine Feehan", tropes:["Paranormal / Shifter","Insta-Love"], spice:3, blurb:"Book one of the long-running Carpathian fated-mates vampire series." },
+    { title:"Mate Claimed", author:"Jennifer Ashley", tropes:["Paranormal / Shifter","Insta-Love"], spice:3, blurb:"Part of the popular Shifters Unbound paranormal romance series." },
+    { title:"It Starts with Us", author:"Colleen Hoover", tropes:["Second Chance"], spice:2, blurb:"The sequel to It Ends With Us, continuing Lily's story." },
+    { title:"The Maddest Obsession", author:"Danielle Lori", tropes:["Mafia Romance","Forbidden Romance"], spice:3, blurb:"The sequel to The Sweetest Oblivion, more mafia entanglement." },
+    { title:"Archer's Voice", author:"Mia Sheridan", tropes:["Small Town","Second Chance"], spice:2, blurb:"A woman connects with a mute man carrying a painful past, in a small coastal town." },
+    { title:"Sexy As Sin", author:"Willow Winters", tropes:["Dark Romance","Second Chance"], spice:4, blurb:"A dark second-chance romance from a prolific indie author." },
+    { title:"Sweet Compulsion", author:"Victoria Woolf", tropes:["Dark Romance","Forbidden Romance"], spice:4, blurb:"A dark, obsessive forbidden romance." },
+    { title:"The Royal We", author:"Heather Cocks & Jessica Morgan", tropes:["Royalty / Arranged Marriage","Slow Burn"], spice:1, blurb:"An American exchange student falls for a British prince." },
+    { title:"Destroy Me", author:"Tahereh Mafi", tropes:["Forbidden Romance"], spice:2, blurb:"A novella bridging the Shatter Me dystopian romance series." },
+    { title:"Us", author:"Sarina Bowen & Elle Kennedy", tropes:["Friends to Lovers","Sports Romance"], spice:3, blurb:"The sequel to Him, two closeted college hockey players building a life together." },
+    { title:"The Ex Hex", author:"Erin Sterling", tropes:["Second Chance","Paranormal / Shifter"], spice:2, blurb:"A witch's petty breakup curse comes back to haunt her nine years later." },
+    { title:"Love and Other Words", author:"Christina Lauren", tropes:["Friends to Lovers","Second Chance"], spice:2, blurb:"Childhood best friends reunite after a decade-long falling out." },
+    { title:"Red, White & Royal Blue", author:"Casey McQuiston", tropes:["Royalty / Arranged Marriage","Forbidden Romance"], spice:2, blurb:"The US President's son falls for a British prince, in secret." },
+    { title:"The Right Swipe", author:"Alisha Rai", tropes:["Second Chance","Workplace Romance"], spice:3, blurb:"A dating-app founder faces off with the man who ghosted her, now a client." },
+    { title:"Wait for It", author:"Mariana Zapata", tropes:["Slow Burn","Marriage of Convenience"], spice:2, blurb:"A green-card marriage of convenience that takes its time becoming real." },
+    { title:"Kulti", author:"Mariana Zapata", tropes:["Slow Burn","Sports Romance","Second Chance"], spice:2, blurb:"A retired soccer star becomes the coach of the woman who idolized him as a kid." },
+    { title:"Loathe", author:"Ashley Poston", tropes:["Enemies to Lovers"], spice:2, blurb:"A modern fairytale retelling with a classic rivals-to-lovers arc." },
+    { title:"A Court of Silver Flames", author:"Sarah J. Maas", tropes:["Slow Burn","Paranormal / Shifter"], spice:4, blurb:"A fae warrior heals from trauma alongside a general who understands her." },
+    { title:"Powerless", author:"Lauren Roberts", tropes:["Forbidden Romance","Enemies to Lovers"], spice:2, blurb:"A powerless girl in a kingdom that kills people like her falls for a prince who hunts them." }
+  ];
+  EXTERNAL_BOOKS.forEach(function(b, i){ b.idx = i; });
+
+  var ICON = {
+    star:'<svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 3.1 1-6.1-4.4-4.3 6.1-.9L12 3.2z"/></svg>',
+    flame:'<svg viewBox="0 0 24 24"><path d="M12 2.4c.4 3-2.6 4.1-4.3 6.7C6.5 11 6 12.7 6 14.2 6 18.6 8.7 21.6 12 21.6s6-3 6-7.4c0-2.2-1-4-2.3-5.4.2 1.6-.5 2.9-1.6 3.2.5-3.5-.7-6.8-2.1-9.6z"/></svg>',
+    x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>',
+    book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 016.5 3H19v16H6.5A2.5 2.5 0 004 16.5v-11z"/><path d="M4 16.5A2.5 2.5 0 016.5 19H19"/></svg>'
+  };
+
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function uid(){ return "b_" + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+  function fmtDate(iso){
+    if(!iso) return "";
+    var d = new Date(iso + "T00:00:00");
+    if(isNaN(d)) return iso;
+    return d.toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" });
+  }
+
+  var S = {
+    tab: "shelf",
+    books: [],
+    customTropes: [],
+    loaded: false,
+    filter: { status:"all", trope:null, search:"", sort:"recent" },
+    recommendTrope: null
+  };
+  var FS = null; // active form state while sheet is open
+
+  // ---------- backend ----------
+  var dbApi = null, booksCol = null, tropesDoc = null;
+  var LS_BOOKS = "shelfspice.books.v1", LS_TROPES = "shelfspice.tropes.v1";
+
+  function localGetBooks(){ try{ return JSON.parse(localStorage.getItem(LS_BOOKS) || "[]"); }catch(e){ return []; } }
+  function localSetBooks(arr){ try{ localStorage.setItem(LS_BOOKS, JSON.stringify(arr)); }catch(e){} }
+  function localGetTropes(){ try{ return JSON.parse(localStorage.getItem(LS_TROPES) || "[]"); }catch(e){ return []; } }
+  function localSetTropes(arr){ try{ localStorage.setItem(LS_TROPES, JSON.stringify(arr)); }catch(e){} }
+
+  function initBackend(){
+    var p;
+    try{
+      p = (window.claude && typeof window.claude.use === "function") ? window.claude.use("db") : Promise.resolve(null);
+    }catch(e){ p = Promise.resolve(null); }
+    p.then(function(api){
+      dbApi = api || null;
+      if(dbApi){
+        booksCol = dbApi.collection("books");
+        tropesDoc = dbApi.doc("meta/tropes");
+        booksCol.onSnapshot(function(snap){
+          S.books = snap.docs.map(function(d){ return Object.assign({ id:d.id }, d.data()); });
+          S.loaded = true;
+          render();
+        }, function(){ S.loaded = true; render(); });
+        tropesDoc.onSnapshot(function(snap){
+          S.customTropes = (snap.exists && snap.data().list) || [];
+          render();
+        }, function(){});
+      } else {
+        S.books = localGetBooks();
+        S.customTropes = localGetTropes();
+        S.loaded = true;
+        render();
+      }
+    }).catch(function(){
+      S.books = localGetBooks();
+      S.customTropes = localGetTropes();
+      S.loaded = true;
+      render();
+    });
+  }
+
+  function upsertBook(book){
+    var isSample = book.id && String(book.id).indexOf("sample-") === 0;
+    var id = (book.id && !isSample) ? book.id : uid();
+    var data = {
+      title: book.title || "Untitled",
+      author: book.author || "",
+      series: book.series || "",
+      status: book.status || "tbr",
+      source: book.source || "",
+      rating: book.rating || 0,
+      spice: book.spice || 0,
+      tropes: book.tropes || [],
+      dateFinished: book.dateFinished || "",
+      notes: book.notes || "",
+      createdAt: book.createdAt || new Date().toISOString()
+    };
+    var idx = S.books.findIndex(function(b){ return b.id === id; });
+    var record = Object.assign({ id:id }, data);
+    if(idx >= 0) S.books[idx] = record; else S.books.push(record);
+    render();
+    if(dbApi){
+      booksCol.doc(id).set(data).catch(function(e){ console.warn("save failed", e); });
+    } else {
+      localSetBooks(S.books);
+    }
+  }
+
+  function removeBook(id){
+    S.books = S.books.filter(function(b){ return b.id !== id; });
+    render();
+    if(dbApi){
+      booksCol.doc(id).delete().catch(function(e){ console.warn("delete failed", e); });
+    } else {
+      localSetBooks(S.books);
+    }
+  }
+
+  function addCustomTrope(name){
+    name = name.trim();
+    if(!name) return null;
+    var all = PRESET_TROPES.concat(S.customTropes);
+    var existing = all.find(function(t){ return t.toLowerCase() === name.toLowerCase(); });
+    if(existing) return existing;
+    S.customTropes = S.customTropes.concat([name]);
+    if(dbApi){
+      tropesDoc.set({ list: S.customTropes }).catch(function(e){ console.warn(e); });
+    } else {
+      localSetTropes(S.customTropes);
+    }
+    return name;
+  }
+
+  // ---------- derived data ----------
+  function effectiveBooks(){ return S.books.length ? S.books : SAMPLE_BOOKS; }
+  function usingSamples(){ return S.books.length === 0; }
+  function allTropes(){
+    var used = {};
+    effectiveBooks().forEach(function(b){ (b.tropes||[]).forEach(function(t){ used[t] = (used[t]||0)+1; }); });
+    var list = Object.keys(used).sort(function(a,b){ return used[b]-used[a] || a.localeCompare(b); });
+    return { list: list, counts: used, picker: PRESET_TROPES.concat(S.customTropes.filter(function(t){ return PRESET_TROPES.indexOf(t) === -1; })) };
+  }
+  function tropeStats(){
+    var stats = {};
+    effectiveBooks().forEach(function(b){
+      if(b.status !== "read" || !b.rating) return;
+      (b.tropes||[]).forEach(function(t){
+        if(!stats[t]) stats[t] = { count:0, sum:0 };
+        stats[t].count++; stats[t].sum += b.rating;
+      });
+    });
+    var arr = Object.keys(stats).map(function(t){ return { trope:t, count:stats[t].count, avg: stats[t].sum/stats[t].count }; });
+    arr.sort(function(a,b){ return b.avg - a.avg || b.count - a.count; });
+    return arr;
+  }
+  function overallStats(){
+    var books = effectiveBooks();
+    var read = books.filter(function(b){ return b.status === "read"; });
+    var rated = read.filter(function(b){ return b.rating > 0; });
+    var avg = rated.length ? (rated.reduce(function(s,b){ return s+b.rating; },0)/rated.length) : 0;
+    var top = tropeStats()[0];
+    return { readCount: read.length, avgRating: avg, topTrope: top ? top.trope : "—" };
+  }
+  function filteredBooks(){
+    var f = S.filter;
+    var list = effectiveBooks().filter(function(b){
+      if(f.status !== "all" && b.status !== f.status) return false;
+      if(f.trope && (b.tropes||[]).indexOf(f.trope) === -1) return false;
+      if(f.search){
+        var q = f.search.toLowerCase();
+        var hay = (b.title+" "+b.author+" "+(b.series||"")).toLowerCase();
+        if(hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    list.sort(function(a,b){
+      if(f.sort === "title") return a.title.localeCompare(b.title);
+      if(f.sort === "rating") return (b.rating||0) - (a.rating||0) || (b.dateFinished||"").localeCompare(a.dateFinished||"");
+      return (b.dateFinished || b.createdAt || "").localeCompare(a.dateFinished || a.createdAt || "");
+    });
+    return list;
+  }
+
+  function amazonSearchUrl(title, author){
+    var q = (title || "") + " " + (author || "");
+    return "https://www.amazon.com/s?k=" + encodeURIComponent(q.trim()) + "&i=digital-text";
+  }
+
+  function externalMatches(trope, limit){
+    var owned = {};
+    S.books.forEach(function(b){ owned[(b.title+"|"+b.author).toLowerCase()] = true; });
+    return EXTERNAL_BOOKS.filter(function(b){
+      return b.tropes.indexOf(trope) !== -1 && !owned[(b.title+"|"+b.author).toLowerCase()];
+    }).slice(0, limit || 6);
+  }
+
+  function quickAddExternal(idx){
+    var b = EXTERNAL_BOOKS[idx];
+    if(!b) return;
+    openForm({
+      title: b.title, author: b.author, series: "", status: "tbr",
+      source: "Kindle Unlimited", rating: 0, spice: 0,
+      tropes: b.tropes.slice(), dateFinished: "", notes: ""
+    });
+  }
+
+  // ---------- small renderers ----------
+  function starsHTML(rating, cls){
+    var out = "";
+    for(var i=1;i<=5;i++) out += ICON.star.replace("<svg ", "<svg class=\"" + (cls||"") + (i<=rating?" filled":"") + "\" ");
+    return out;
+  }
+  function flamesHTML(spice, cls){
+    var out = "";
+    for(var i=1;i<=5;i++) out += ICON.flame.replace("<svg ", "<svg class=\"" + (cls||"") + (i<=spice?" filled":"") + "\" ");
+    return out;
+  }
+  function pillClass(status){ return "pill pill-" + status; }
+
+  function bookCardHTML(b, opts){
+    opts = opts || {};
+    var tropeChips = (b.tropes||[]).slice(0,5).map(function(t){
+      return '<span class="trope-chip' + (opts.highlightTrope===t ? " is-gold":"") + '">' + esc(t) + "</span>";
+    }).join("");
+    return (
+      '<div class="book-card' + (opts.isNext ? " is-next":"") + '" data-action="edit-book" data-id="' + esc(b.id) + '">' +
+        (opts.isNext ? '<span class="badge-next">Read Next</span><br>' : "") +
+        '<div class="book-card-head">' +
+          '<div><p class="book-title">' + esc(b.title) + '</p>' +
+          '<p class="book-sub">' + esc(b.author || "Unknown author") + (b.series ? " &middot; " + esc(b.series) : "") + '</p></div>' +
+          '<span class="' + pillClass(b.status) + '">' + STATUS_LABELS[b.status] + '</span>' +
+        '</div>' +
+        '<div class="book-meta-row">' +
+          '<span class="icon-rating">' + starsHTML(b.rating) + '</span>' +
+          '<span class="icon-spice">' + flamesHTML(b.spice) + '</span>' +
+          (b.source ? '<span class="meta-source">' + esc(b.source) + '</span>' : "") +
+          (b.dateFinished ? '<span class="meta-source">' + fmtDate(b.dateFinished) + '</span>' : "") +
+          '<a class="kindle-link" href="' + amazonSearchUrl(b.title, b.author) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">Find on Kindle &#8599;</a>' +
+        '</div>' +
+        (tropeChips ? '<div class="trope-chip-row">' + tropeChips + '</div>' : "") +
+      '</div>'
+    );
+  }
+
+  function externalCardHTML(b){
+    var tropeChips = b.tropes.slice(0,4).map(function(t){ return '<span class="trope-chip">' + esc(t) + '</span>'; }).join("");
+    return (
+      '<div class="external-card">' +
+        '<div class="book-card-head">' +
+          '<div><p class="book-title">' + esc(b.title) + '</p>' +
+          '<p class="book-sub">' + esc(b.author) + '</p></div>' +
+        '</div>' +
+        '<p class="external-blurb">' + esc(b.blurb) + '</p>' +
+        '<div class="book-meta-row"><span class="icon-spice">' + flamesHTML(b.spice) + '</span><span class="meta-source">approx. spice</span></div>' +
+        (tropeChips ? '<div class="trope-chip-row">' + tropeChips + '</div>' : "") +
+        '<div class="external-actions">' +
+          '<a class="kindle-link" href="' + amazonSearchUrl(b.title, b.author) + '" target="_blank" rel="noopener">Find on Kindle &#8599;</a>' +
+          '<button type="button" class="btn-add-small" data-action="quick-add-external" data-idx="' + b.idx + '">+ Add to Shelf</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  // ---------- topbar ----------
+  function renderTopbar(){
+    var titles = { shelf:"Your Shelf", recommend:"Recommend", };
+    var eyebrow = { shelf:"Shelf & Spice", recommend:"Shelf & Spice" };
+    var stat = S.tab === "shelf" ? effectiveBooks().length + " books" : "";
+    document.getElementById("topbar").innerHTML =
+      '<p class="eyebrow">' + eyebrow[S.tab] + '</p>' +
+      '<div class="topbar-row"><h1>' + titles[S.tab] + '</h1><span class="topbar-stat">' + stat + '</span></div>';
+  }
+
+  // ---------- shelf tab ----------
+  function renderShelf(){
+    var books = filteredBooks();
+    var tropeInfo = allTropes();
+    var html = "";
+
+    if(usingSamples()){
+      html += '<div class="banner-sample"><span><b>Sample shelf.</b> Add your first read to replace these examples.</span></div>';
+    }
+
+    html += '<div class="searchbar">' + ICON.search + '<input type="text" id="search-input" placeholder="Search title, author, series" value="' + esc(S.filter.search) + '"></div>';
+
+    html += '<div class="filter-row"><div class="chiprow" id="status-chips">';
+    [["all","All"],["tbr","Want to Read"],["reading","Reading"],["read","Finished"],["dnf","DNF"]].forEach(function(pair){
+      html += '<button class="chip' + (S.filter.status===pair[0]?" active":"") + '" data-action="set-status-filter" data-status="' + pair[0] + '">' + pair[1] + '</button>';
+    });
+    html += '</div><select class="sortselect" id="sort-select">' +
+      '<option value="recent"' + (S.filter.sort==="recent"?" selected":"") + '>Recent</option>' +
+      '<option value="rating"' + (S.filter.sort==="rating"?" selected":"") + '>Top rated</option>' +
+      '<option value="title"' + (S.filter.sort==="title"?" selected":"") + '>Title A-Z</option>' +
+      '</select></div>';
+
+    if(tropeInfo.list.length){
+      html += '<div class="chiprow" style="margin-bottom:14px;">';
+      html += '<button class="chip' + (!S.filter.trope?" active":"") + '" data-action="set-trope-filter" data-trope="">All tropes</button>';
+      tropeInfo.list.forEach(function(t){
+        html += '<button class="chip' + (S.filter.trope===t?" active":"") + '" data-action="set-trope-filter" data-trope="' + esc(t) + '">' + esc(t) + '</button>';
+      });
+      html += '</div>';
+    }
+
+    if(books.length){
+      html += '<div class="book-list">' + books.map(function(b){ return bookCardHTML(b); }).join("") + '</div>';
+    } else {
+      html += '<div class="empty-state">' + ICON.book + '<p>No books match these filters.</p></div>';
+    }
+
+    document.getElementById("content").innerHTML = html;
+  }
+
+  // ---------- recommend tab ----------
+  function renderRecommend(){
+    var stats = overallStats();
+    var ranks = tropeStats().slice(0,6);
+    var books = effectiveBooks();
+    var html = "";
+
+    html += '<div class="stat-row">' +
+      '<div class="stat-tile"><span class="stat-value">' + stats.readCount + '</span><span class="stat-label">Books read</span></div>' +
+      '<div class="stat-tile"><span class="stat-value">' + (stats.avgRating ? stats.avgRating.toFixed(1) : "—") + '</span><span class="stat-label">Avg rating</span></div>' +
+      '<div class="stat-tile"><span class="stat-value" style="font-size:13px;">' + esc(stats.topTrope) + '</span><span class="stat-label">Top trope</span></div>' +
+      '</div>';
+
+    html += '<h2 class="section-title">Your Top Tropes</h2>';
+    if(ranks.length){
+      html += '<p class="section-hint">Ranked by how you’ve rated finished books. Tap one to see matches.</p>';
+      html += '<div class="trope-rank-list">' + ranks.map(function(r){
+        return '<div class="trope-rank-item' + (S.recommendTrope===r.trope?" active":"") + '" data-action="set-recommend-trope" data-trope="' + esc(r.trope) + '">' +
+          '<span class="trope-rank-name">' + esc(r.trope) + '</span>' +
+          '<span class="trope-rank-meta"><span class="icon-rating">' + starsHTML(Math.round(r.avg)) + '</span>' + r.count + ' book' + (r.count===1?"":"s") + '</span>' +
+        '</div>';
+      }).join("") + '</div>';
+    } else {
+      html += '<p class="section-hint">Rate a few finished books to see your favorite tropes here.</p>';
+    }
+
+    var tropeInfo = allTropes();
+    html += '<h2 class="section-title">Browse by Trope</h2>';
+    html += '<div class="chiprow" style="margin-bottom:14px;">' + tropeInfo.list.map(function(t){
+      return '<button class="chip' + (S.recommendTrope===t?" active":"") + '" data-action="set-recommend-trope" data-trope="' + esc(t) + '">' + esc(t) + ' &middot; ' + tropeInfo.counts[t] + '</button>';
+    }).join("") + '</div>';
+
+    if(!S.recommendTrope && ranks.length) S.recommendTrope = ranks[0].trope;
+    else if(!S.recommendTrope && tropeInfo.list.length) S.recommendTrope = tropeInfo.list[0];
+
+    if(S.recommendTrope){
+      var t = S.recommendTrope;
+      var matchNext = books.filter(function(b){ return b.status === "tbr" && (b.tropes||[]).indexOf(t) !== -1; });
+      var matchRead = books.filter(function(b){ return b.status === "read" && (b.tropes||[]).indexOf(t) !== -1; })
+        .sort(function(a,b){ return (b.rating||0)-(a.rating||0); });
+      var matchExternal = externalMatches(t, 6);
+
+      if(matchNext.length){
+        html += '<div class="match-group"><h2 class="section-title">Read Next</h2><div class="book-list">' +
+          matchNext.map(function(b){ return bookCardHTML(b, { isNext:true, highlightTrope:t }); }).join("") + '</div></div>';
+      }
+      if(matchRead.length){
+        html += '<div class="match-group"><h2 class="section-title">You Loved These</h2><div class="book-list">' +
+          matchRead.map(function(b){ return bookCardHTML(b, { highlightTrope:t }); }).join("") + '</div></div>';
+      }
+      if(!matchNext.length && !matchRead.length){
+        html += '<p class="section-hint">No books tagged “' + esc(t) + '” yet.</p>';
+      }
+
+      html += '<div class="match-group"><h2 class="section-title">Discover New: “' + esc(t) + '”</h2>' +
+        '<p class="section-hint">Curated picks from popular romance releases &mdash; not from your shelf, and not live web search. Tropes are general reader consensus, so double-check before you dive in.</p>';
+      if(matchExternal.length){
+        html += '<div class="book-list">' + matchExternal.map(externalCardHTML).join("") + '</div>';
+      } else {
+        html += '<p class="section-hint">No curated picks for this trope yet &mdash; try another one above.</p>';
+      }
+      var thisRank = ranks.find(function(r){ return r.trope === t; });
+      if(thisRank && thisRank.avg >= 4 && matchExternal.length < 3){
+        html += '<p class="section-hint" style="margin-top:10px;"><b>This is one of your favorite tropes but the curated list is thin here.</b> Worth asking to have “' + esc(t) + '” expanded next.</p>';
+      }
+      html += '</div>';
+    } else {
+      html += '<p class="section-hint">Pick a trope above to see matches.</p>';
+    }
+
+    document.getElementById("content").innerHTML = html;
+  }
+
+  // ---------- sheet (add/edit) ----------
+  function openForm(book){
+    var prefill = !!book;
+    var isEdit = !!(book && book.id);
+    var isSample = isEdit && String(book.id).indexOf("sample-") === 0;
+    FS = {
+      id: isEdit ? book.id : null,
+      isSample: isSample,
+      createdAt: isEdit ? book.createdAt : null,
+      title: prefill ? (book.title||"") : "",
+      author: prefill ? (book.author||"") : "",
+      series: prefill ? (book.series||"") : "",
+      status: prefill ? (book.status||"tbr") : "tbr",
+      source: prefill ? (book.source||"Kindle Unlimited") : "Kindle Unlimited",
+      rating: prefill ? (book.rating||0) : 0,
+      spice: prefill ? (book.spice||0) : 0,
+      tropes: prefill ? (book.tropes||[]).slice() : [],
+      dateFinished: prefill ? (book.dateFinished||"") : "",
+      notes: prefill ? (book.notes||"") : ""
+    };
+    renderSheet();
+    document.getElementById("sheet-overlay").classList.add("open");
+  }
+  function closeForm(){
+    document.getElementById("sheet-overlay").classList.remove("open");
+    FS = null;
+  }
+
+  function renderSheet(){
+    if(!FS) return;
+    var tropeInfo = allTropes();
+    var html = "";
+    html += '<div class="sheet-header"><h2>' + (FS.id ? "Edit Book" : "Add a Book") + '</h2>' +
+      '<button class="sheet-close" data-action="close-sheet">' + ICON.x + '</button></div>';
+    if(FS.isSample) html += '<p class="sheet-note">This is example data &mdash; saving adds it as a real book on your shelf.</p>';
+
+    html += '<form id="book-form">';
+    html += '<div class="form-row"><label class="label" for="f-title">Title</label><input class="input" id="f-title" required autocomplete="off" value="' + esc(FS.title) + '" placeholder="Book title">' +
+      '<div class="suggestions" id="title-suggestions" hidden></div></div>';
+    html += '<div class="two-col">' +
+      '<div class="form-row"><label class="label" for="f-author">Author</label><input class="input" id="f-author" value="' + esc(FS.author) + '" placeholder="Author"></div>' +
+      '<div class="form-row"><label class="label" for="f-series">Series</label><input class="input" id="f-series" value="' + esc(FS.series) + '" placeholder="Optional"></div>' +
+    '</div>';
+
+    html += '<div class="form-row"><label class="label">Status</label><div class="segmented" id="status-segmented">' +
+      Object.keys(STATUS_LABELS).map(function(k){ return '<button type="button" class="segmented-btn' + (FS.status===k?" active":"") + '" data-status="' + k + '">' + STATUS_LABELS[k] + '</button>'; }).join("") +
+      '</div></div>';
+
+    html += '<div class="form-row"><label class="label">Rating</label><div class="picker-row" id="rating-picker">' +
+      [1,2,3,4,5].map(function(i){ return '<button type="button" class="picker-btn" data-value="' + i + '">' + ICON.star.replace("<svg ", "<svg class=\"" + (i<=FS.rating?"filled":"") + "\" ") + '</button>'; }).join("") +
+    '</div></div>';
+
+    html += '<div class="form-row"><label class="label">Spice</label><div class="picker-row" id="spice-picker">' +
+      [1,2,3,4,5].map(function(i){ return '<button type="button" class="picker-btn spice" data-value="' + i + '">' + ICON.flame.replace("<svg ", "<svg class=\"" + (i<=FS.spice?"filled":"") + "\" ") + '</button>'; }).join("") +
+    '</div></div>';
+
+    html += '<div class="two-col">' +
+      '<div class="form-row"><label class="label" for="f-date">Date finished</label><input class="input" type="date" id="f-date" value="' + esc(FS.dateFinished) + '"></div>' +
+      '<div class="form-row"><label class="label">Source</label><select class="input" id="f-source">' +
+        SOURCES.map(function(s){ return '<option' + (FS.source===s?" selected":"") + '>' + s + '</option>'; }).join("") +
+      '</select></div>' +
+    '</div>';
+
+    html += '<div class="form-row"><label class="label">Tropes</label><div class="trope-picker" id="trope-picker">' +
+      tropeInfo.picker.map(function(t){ return '<button type="button" class="chip' + (FS.tropes.indexOf(t)!==-1?" active":"") + '" data-trope="' + esc(t) + '">' + esc(t) + '</button>'; }).join("") +
+      '</div>' +
+      '<div class="add-trope-row"><input class="input" id="f-custom-trope" placeholder="Add a custom trope&hellip;"><button type="button" id="add-trope-btn">Add</button></div>' +
+    '</div>';
+
+    html += '<div class="form-row"><label class="label" for="f-notes">Notes</label><textarea class="textarea" id="f-notes" placeholder="Thoughts, favorite quotes, warnings&hellip;">' + esc(FS.notes) + '</textarea></div>';
+
+    html += '<div class="sheet-footer">';
+    if(FS.id) html += '<button type="button" class="btn btn-danger" id="delete-btn">Delete</button>';
+    html += '<button type="submit" class="btn btn-primary">' + (FS.id ? "Save Changes" : "Add to Shelf") + '</button>';
+    html += '</div></form>';
+
+    document.getElementById("sheet").innerHTML = html;
+    bindSheetEvents();
+  }
+
+  function bindSheetEvents(){
+    var sheet = document.getElementById("sheet");
+
+    var titleInput = document.getElementById("f-title");
+    var suggestBox = document.getElementById("title-suggestions");
+    titleInput.addEventListener("input", function(){
+      var q = titleInput.value.trim().toLowerCase();
+      if(q.length < 2){ suggestBox.hidden = true; suggestBox.innerHTML = ""; return; }
+      var matches = EXTERNAL_BOOKS.filter(function(b){ return b.title.toLowerCase().indexOf(q) !== -1; }).slice(0,5);
+      if(!matches.length){ suggestBox.hidden = true; suggestBox.innerHTML = ""; return; }
+      suggestBox.innerHTML = matches.map(function(b){
+        return '<button type="button" class="suggestion-item" data-idx="' + b.idx + '">' + esc(b.title) + '<span>' + esc(b.author) + '</span></button>';
+      }).join("");
+      suggestBox.hidden = false;
+    });
+    titleInput.addEventListener("blur", function(){ setTimeout(function(){ suggestBox.hidden = true; }, 150); });
+    suggestBox.addEventListener("click", function(e){
+      var item = e.target.closest(".suggestion-item"); if(!item) return;
+      var b = EXTERNAL_BOOKS[Number(item.getAttribute("data-idx"))];
+      if(!b) return;
+      titleInput.value = b.title;
+      document.getElementById("f-author").value = b.author;
+      FS.spice = b.spice;
+      sheet.querySelectorAll("#spice-picker .picker-btn").forEach(function(btn,i){ btn.querySelector("svg").classList.toggle("filled", (i+1) <= FS.spice); });
+      FS.tropes = b.tropes.slice();
+      sheet.querySelectorAll("#trope-picker .chip").forEach(function(chip){
+        chip.classList.toggle("active", FS.tropes.indexOf(chip.getAttribute("data-trope")) !== -1);
+      });
+      suggestBox.hidden = true; suggestBox.innerHTML = "";
+    });
+
+    document.getElementById("status-segmented").addEventListener("click", function(e){
+      var btn = e.target.closest(".segmented-btn"); if(!btn) return;
+      FS.status = btn.getAttribute("data-status");
+      sheet.querySelectorAll("#status-segmented .segmented-btn").forEach(function(b){ b.classList.toggle("active", b===btn); });
+    });
+
+    document.getElementById("rating-picker").addEventListener("click", function(e){
+      var btn = e.target.closest(".picker-btn"); if(!btn) return;
+      var v = Number(btn.getAttribute("data-value"));
+      FS.rating = (FS.rating === v) ? 0 : v;
+      sheet.querySelectorAll("#rating-picker .picker-btn").forEach(function(b,i){ b.querySelector("svg").classList.toggle("filled", (i+1) <= FS.rating); });
+    });
+
+    document.getElementById("spice-picker").addEventListener("click", function(e){
+      var btn = e.target.closest(".picker-btn"); if(!btn) return;
+      var v = Number(btn.getAttribute("data-value"));
+      FS.spice = (FS.spice === v) ? 0 : v;
+      sheet.querySelectorAll("#spice-picker .picker-btn").forEach(function(b,i){ b.querySelector("svg").classList.toggle("filled", (i+1) <= FS.spice); });
+    });
+
+    document.getElementById("trope-picker").addEventListener("click", function(e){
+      var chip = e.target.closest(".chip"); if(!chip) return;
+      var t = chip.getAttribute("data-trope");
+      var idx = FS.tropes.indexOf(t);
+      if(idx === -1) FS.tropes.push(t); else FS.tropes.splice(idx,1);
+      chip.classList.toggle("active");
+    });
+
+    document.getElementById("add-trope-btn").addEventListener("click", function(){
+      var input = document.getElementById("f-custom-trope");
+      var name = addCustomTrope(input.value);
+      if(!name) return;
+      input.value = "";
+      if(FS.tropes.indexOf(name) === -1) FS.tropes.push(name);
+      var picker = document.getElementById("trope-picker");
+      var existingChip = Array.prototype.find.call(picker.querySelectorAll(".chip"), function(c){ return c.getAttribute("data-trope") === name; });
+      if(!existingChip){
+        picker.insertAdjacentHTML("beforeend", '<button type="button" class="chip active" data-trope="' + esc(name) + '">' + esc(name) + '</button>');
+      } else {
+        existingChip.classList.add("active");
+      }
+    });
+
+    document.getElementById("f-custom-trope").addEventListener("keydown", function(e){
+      if(e.key === "Enter"){ e.preventDefault(); document.getElementById("add-trope-btn").click(); }
+    });
+
+    if(document.getElementById("delete-btn")){
+      document.getElementById("delete-btn").addEventListener("click", function(){
+        if(!FS.isSample) removeBook(FS.id);
+        closeForm();
+      });
+    }
+
+    document.getElementById("book-form").addEventListener("submit", function(e){
+      e.preventDefault();
+      var title = document.getElementById("f-title").value.trim();
+      if(!title) return;
+      upsertBook({
+        id: FS.id, createdAt: FS.createdAt,
+        title: title,
+        author: document.getElementById("f-author").value.trim(),
+        series: document.getElementById("f-series").value.trim(),
+        status: FS.status,
+        source: document.getElementById("f-source").value,
+        rating: FS.rating,
+        spice: FS.spice,
+        tropes: FS.tropes,
+        dateFinished: document.getElementById("f-date").value,
+        notes: document.getElementById("f-notes").value.trim()
+      });
+      closeForm();
+      S.tab = "shelf";
+      render();
+    });
+  }
+
+  // ---------- master render ----------
+  function render(){
+    renderTopbar();
+    if(S.tab === "shelf") renderShelf(); else renderRecommend();
+    document.querySelectorAll("#tabbar .tabbtn[data-tab]").forEach(function(b){
+      b.classList.toggle("active", b.getAttribute("data-tab") === S.tab);
+    });
+  }
+
+  // ---------- global event delegation ----------
+  document.addEventListener("click", function(e){
+    var actionEl = e.target.closest("[data-action]");
+    if(!actionEl) return;
+    var action = actionEl.getAttribute("data-action");
+    if(action === "switch-tab"){
+      S.tab = actionEl.getAttribute("data-tab");
+      render();
+    } else if(action === "open-add"){
+      openForm(null);
+    } else if(action === "edit-book"){
+      var id = actionEl.getAttribute("data-id");
+      var book = effectiveBooks().find(function(b){ return b.id === id; });
+      if(book) openForm(book);
+    } else if(action === "close-sheet"){
+      closeForm();
+    } else if(action === "set-status-filter"){
+      S.filter.status = actionEl.getAttribute("data-status");
+      renderShelf();
+    } else if(action === "set-trope-filter"){
+      var tv = actionEl.getAttribute("data-trope");
+      S.filter.trope = tv || null;
+      renderShelf();
+    } else if(action === "set-recommend-trope"){
+      var rt = actionEl.getAttribute("data-trope");
+      S.recommendTrope = (S.recommendTrope === rt) ? null : rt;
+      renderRecommend();
+    } else if(action === "quick-add-external"){
+      quickAddExternal(Number(actionEl.getAttribute("data-idx")));
+    }
+  });
+
+  document.getElementById("sheet-overlay").addEventListener("click", function(e){
+    if(e.target.id === "sheet-overlay") closeForm();
+  });
+
+  document.addEventListener("input", function(e){
+    if(e.target.id === "search-input"){
+      S.filter.search = e.target.value;
+      renderShelfBooksOnly();
+    }
+  });
+  function renderShelfBooksOnly(){
+    var books = filteredBooks();
+    var listEl = document.querySelector("#content .book-list");
+    var emptyEl = document.querySelector("#content .empty-state");
+    var html = books.length ? books.map(function(b){ return bookCardHTML(b); }).join("") : "";
+    if(listEl) listEl.innerHTML = html;
+    if(!listEl && books.length){ renderShelf(); return; }
+    if(emptyEl && books.length){ renderShelf(); return; }
+    if(listEl && !books.length){ renderShelf(); return; }
+  }
+
+  document.addEventListener("change", function(e){
+    if(e.target.id === "sort-select"){
+      S.filter.sort = e.target.value;
+      renderShelf();
+    }
+  });
+
+  render();
+  initBackend();
+})();
+</script>
+</body>
+</html>
